@@ -182,6 +182,66 @@ const SPOTLIGHT_BANNERS = [
 
 const NEW_NOTEWORTHY = [
   {
+    title: 'Native Smart Water Purifier',
+    category: 'AC & Appliance Repair',
+    price: 1999,
+    originalPrice: 2299,
+    rating: '4.91',
+    img: img('photo-1600585154340-be6161a56a0c'),
+    isNew: true,
+    subtitle: 'Native RO Water Purifier — No service needed for 2 years',
+    inclusions: [
+      '10-stage RO + UV + UF purification technology',
+      'In-built TDS controller & mineral booster',
+      'Zero maintenance cost for 2 full years'
+    ]
+  },
+  {
+    title: 'Smart Television Wall Mounting',
+    category: 'Electrical',
+    price: 349,
+    originalPrice: 449,
+    rating: '4.85',
+    img: img('photo-1593784991095-a205069470b6'),
+    isNew: true,
+    subtitle: 'Precision Spirit Level TV Bracket Installation up to 75"',
+    inclusions: [
+      'Heavy-duty wall bracket alignment with spirit level',
+      'Cable conceal conduit routing & power socket check',
+      'Safety load check for OLED / QLED / LED screens'
+    ]
+  },
+  {
+    title: 'Stress Relief Swedish Body Massage',
+    category: 'Beauty & Salon',
+    price: 1299,
+    originalPrice: 1499,
+    rating: '4.94',
+    img: img('photo-1544161515-4ab6ce6db874'),
+    isNew: true,
+    subtitle: 'Relaxing full body organic oil massage by top certified therapists',
+    inclusions: [
+      '60-minute full body muscle tension release massage',
+      'Aromatherapy lavender & eucalyptus essential oils',
+      'Single-use disposable sheets & fresh towel kit'
+    ]
+  },
+  {
+    title: 'Native RO Water Softener for Taps',
+    category: 'Plumbing',
+    price: 1499,
+    originalPrice: 1799,
+    rating: '4.88',
+    img: img('photo-1585704032915-c3400ca199e7'),
+    isNew: true,
+    subtitle: 'Prevents hard water scale damage on skin, hair & geysers',
+    inclusions: [
+      'High-capacity resin technology for 99% hard water softening',
+      'Instant attachment to main shower or washing machine tap',
+      'Free 1-year cartridge replacement guarantee'
+    ]
+  },
+  {
     title: 'Kitchen Chimney Servicing',
     category: 'Home Cleaning',
     price: 699,
@@ -197,48 +257,18 @@ const NEW_NOTEWORTHY = [
     ]
   },
   {
-    title: 'Native Smart Water Purifier',
-    category: 'AC & Appliance Repair',
-    price: 1999,
-    originalPrice: 2299,
-    rating: '4.91',
-    img: img('photo-1600585154340-be6161a56a0c'),
-    isNew: false,
-    subtitle: 'Native RO Water Purifier — No service needed for 2 years',
-    inclusions: [
-      '10-stage RO + UV + UF purification technology',
-      'In-built TDS controller & mineral booster',
-      'Zero maintenance cost for 2 full years'
-    ]
-  },
-  {
-    title: 'Smart Television Wall Mounting',
+    title: 'Smart Modular Switchboard Module',
     category: 'Electrical',
-    price: 349,
-    originalPrice: 449,
-    rating: '4.80',
-    img: img('photo-1593784991095-a205069470b6'),
+    price: 549,
+    originalPrice: 649,
+    rating: '4.82',
+    img: img('photo-1603796846097-bee99e4a601f'),
     isNew: true,
-    subtitle: 'Precision Spirit Level TV Bracket Installation up to 75"',
+    subtitle: 'IoT Wi-Fi Smart Switch Installation for Alexa & Google Home',
     inclusions: [
-      'Heavy-duty wall bracket alignment with spirit level',
-      'Cable conceal conduit routing & power socket check',
-      'Safety load check for OLED / QLED / LED screens'
-    ]
-  },
-  {
-    title: 'Bathroom Tile & Fittings Upgrade',
-    category: 'Plumbing',
-    price: 899,
-    originalPrice: 999,
-    rating: '4.76',
-    img: img('photo-1584622650111-993a426fbf0a'),
-    isNew: false,
-    subtitle: 'Grout re-sealing & high-shine chrome fitting polish',
-    inclusions: [
-      'Epoxy re-grouting of tile joints against water seepage',
-      'Descaling of shower heads, faucets & health faucets',
-      'Anti-fungal silicone sealing along wash basin edges'
+      'Wi-Fi touch switch fitting inside existing modular board',
+      'Mobile app pairing & voice assistant sync',
+      'Safe surge protection & load testing'
     ]
   }
 ];
@@ -705,7 +735,7 @@ export default function LandingPage() {
             <span
               className="btn btn-outline btn-sm"
               style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
-              onClick={() => handleServiceClick('All Services')}
+              onClick={() => handleServiceClick({ title: 'In the Spotlight Services', type: 'section_all', items: spotlightBannersList })}
             >
               See all →
             </span>
@@ -769,7 +799,7 @@ export default function LandingPage() {
             <span
               className="btn btn-outline btn-sm"
               style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
-              onClick={() => handleServiceClick('All Services')}
+              onClick={() => handleServiceClick({ title: 'New & Noteworthy Smart Products & Services', type: 'section_all', items: newNoteworthyList })}
             >
               See all →
             </span>
@@ -862,7 +892,7 @@ export default function LandingPage() {
             <span
               className="btn btn-outline btn-sm"
               style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
-              onClick={() => handleServiceClick('All Services')}
+              onClick={() => handleServiceClick({ title: 'Most Booked Services & Packages', type: 'section_all', items: mostBookedList })}
             >
               See all →
             </span>
@@ -1265,13 +1295,22 @@ function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCa
   // 2. Service card object        → has .title, .category, .price, .inclusions[]
   // 3. String (legacy fallback)   → just a category name string
   const isCategoryTile = typeof category === 'object' && category !== null && Array.isArray(category.services);
-  const isServiceObj = typeof category === 'object' && category !== null && !isCategoryTile;
+  const isSectionObj = typeof category === 'object' && category !== null && category.type === 'section_all';
+  const isServiceObj = typeof category === 'object' && category !== null && !isCategoryTile && !isSectionObj;
+
   const catName = isCategoryTile
     ? category.dbCategory
     : isServiceObj
     ? (category.category || null)
-    : (category !== 'All Services' ? category : null);
-  const displayName = isCategoryTile ? category.title : isServiceObj ? category.title : category;
+    : (typeof category === 'string' && category !== 'All Services' ? category : null);
+
+  const displayName = isSectionObj
+    ? category.title
+    : isCategoryTile
+    ? category.title
+    : isServiceObj
+    ? category.title
+    : category;
 
   useEffect(() => {
     const fetchApprovedAndServices = async () => {
@@ -1317,7 +1356,97 @@ function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCa
         onClick={(e) => e.stopPropagation()}
         style={{ width: '100%', maxWidth: 880, maxHeight: '92vh', background: 'var(--surface)', borderRadius: 24, border: '1px solid var(--border)', overflowY: 'auto', position: 'relative', boxShadow: '0 25px 60px -12px rgba(0,0,0,0.4)' }}
       >
-        {/* Close button */}
+        {/* If clicked from a Section "See all ->": show Section Hero + Items Grid */}
+        {isSectionObj && (
+          <div style={{ padding: '24px 28px 16px', borderBottom: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+              <Sparkles size={20} color="var(--brand-500)" />
+              <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--brand-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Featured Catalog
+              </span>
+            </div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 800, margin: '0 0 16px', color: 'var(--text)' }}>
+              {category.title}
+            </h2>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
+              {category.items?.map((item) => (
+                <div
+                  key={item.title}
+                  style={{
+                    padding: 16,
+                    borderRadius: 18,
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface-2)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 12
+                  }}
+                >
+                  <div className="flex items-start gap-3">
+                    <img
+                      src={item.img}
+                      alt={item.title}
+                      style={{ width: 84, height: 84, borderRadius: 14, objectFit: 'cover', flexShrink: 0 }}
+                    />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      {item.category && (
+                        <span style={{ fontSize: '0.67rem', fontWeight: 800, color: 'var(--brand-500)', textTransform: 'uppercase', letterSpacing: '0.07em', display: 'block', marginBottom: 2 }}>
+                          {item.category}
+                        </span>
+                      )}
+                      <strong style={{ fontSize: '0.98rem', color: 'var(--text)', display: 'block', lineHeight: 1.25 }}>{item.title}</strong>
+                      {item.subtitle && <p style={{ fontSize: '0.78rem', color: 'var(--text-3)', margin: '4px 0 0', lineHeight: 1.35 }}>{item.subtitle}</p>}
+                      <div className="flex items-center gap-2 mt-2">
+                        <span style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text)' }}>₹{item.price}</span>
+                        {item.originalPrice && <strike style={{ fontSize: '0.8rem', color: 'var(--text-4)' }}>₹{item.originalPrice}</strike>}
+                        {item.originalPrice && (
+                          <span style={{ background: '#e6f4ea', color: '#0f8a5f', fontSize: '0.7rem', fontWeight: 800, padding: '2px 7px', borderRadius: 6 }}>
+                            {Math.round(((item.originalPrice - item.price) / item.originalPrice) * 100)}% OFF
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {item.inclusions && item.inclusions.length > 0 && (
+                    <div style={{ background: 'var(--surface)', padding: '10px 12px', borderRadius: 12, border: '1px solid var(--border)' }}>
+                      <div style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>What's included</div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        {item.inclusions.map((inc, i) => (
+                          <div key={i} style={{ fontSize: '0.78rem', color: 'var(--text-2)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ color: 'var(--brand-500)', fontWeight: 900 }}>✓</span> {inc}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 'auto' }}>
+                    {getQty(item) > 0 ? (
+                      <div
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--brand-50)', border: '1px solid var(--brand-500)', borderRadius: 8, padding: '4px 12px' }}
+                      >
+                        <button onClick={() => onRemoveFromCart(item)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: 900, color: 'var(--brand-600)' }}>-</button>
+                        <strong style={{ fontSize: '0.9rem', color: 'var(--brand-600)' }}>{getQty(item)}</strong>
+                        <button onClick={() => onAddToCart(item)} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontWeight: 900, color: 'var(--brand-600)' }}>+</button>
+                      </div>
+                    ) : (
+                      <button
+                        className="btn btn-primary btn-sm"
+                        style={{ borderRadius: 10, fontWeight: 800, padding: '6px 18px' }}
+                        onClick={() => onAddToCart(item)}
+                      >
+                        Add +
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         <button
           onClick={onClose}
           style={{ position: 'sticky', top: 16, left: '100%', marginRight: 16, background: 'var(--surface-2)', border: 'none', borderRadius: '50%', width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text)', zIndex: 10, float: 'right' }}
