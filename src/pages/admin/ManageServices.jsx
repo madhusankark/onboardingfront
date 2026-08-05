@@ -15,7 +15,9 @@ import {
   Star,
   DollarSign,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Package,
+  Layers
 } from 'lucide-react';
 
 export default function ManageServices() {
@@ -29,15 +31,21 @@ export default function ManageServices() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategory, setCustomCategory] = useState('');
+
   const [form, setForm] = useState({
     name: '',
     category: 'AC & Appliance Repair',
+    section: 'general',
+    itemType: 'service',
     price: '',
     originalPrice: '',
     time: '1 hr',
     rating: '4.85',
     description: '',
-    img: ''
+    img: '',
+    inclusionsStr: ''
   });
 
   const load = async () => {
@@ -58,37 +66,48 @@ export default function ManageServices() {
 
   const openCreateModal = () => {
     setEditingItem(null);
+    setIsCustomCategory(false);
+    setCustomCategory('');
     setForm({
       name: '',
       category: 'AC & Appliance Repair',
+      section: 'general',
+      itemType: 'service',
       price: '',
       originalPrice: '',
       time: '1-2 hrs',
       rating: '4.85',
       description: '',
-      img: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=400&q=80'
+      img: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=400&q=80',
+      inclusionsStr: ''
     });
     setModalOpen(true);
   };
 
   const openEditModal = (item) => {
     setEditingItem(item);
+    setIsCustomCategory(false);
+    setCustomCategory('');
     setForm({
       name: item.name,
       category: item.category,
+      section: item.section || 'general',
+      itemType: item.itemType || 'service',
       price: item.price,
       originalPrice: item.originalPrice || item.price + 100,
       time: item.time || '1 hr',
       rating: item.rating || '4.85',
       description: item.description || '',
-      img: item.img || ''
+      img: item.img || '',
+      inclusionsStr: Array.isArray(item.inclusions) ? item.inclusions.join('\n') : ''
     });
     setModalOpen(true);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!form.name.trim() || !form.category.trim() || !form.price) {
+    const finalCategory = isCustomCategory ? customCategory.trim() : form.category;
+    if (!form.name.trim() || !finalCategory || !form.price) {
       setAlert({ type: 'danger', message: 'Name, Category, and Price are required.' });
       return;
     }
@@ -96,12 +115,18 @@ export default function ManageServices() {
     setSaving(true);
     setAlert({ type: '', message: '' });
     try {
+      const payload = {
+        ...form,
+        category: finalCategory,
+        inclusions: form.inclusionsStr.split('\n').map((s) => s.trim()).filter(Boolean)
+      };
+
       if (editingItem) {
-        await updateServiceItem(editingItem._id, form);
-        setAlert({ type: 'success', message: `Updated pricing for "${form.name}" successfully!` });
+        await updateServiceItem(editingItem._id, payload);
+        setAlert({ type: 'success', message: `Updated item "${form.name}" successfully!` });
       } else {
-        await createServiceItem(form);
-        setAlert({ type: 'success', message: `Created new service "${form.name}" successfully!` });
+        await createServiceItem(payload);
+        setAlert({ type: 'success', message: `Created new item "${form.name}" under ${form.section} section!` });
       }
       setModalOpen(false);
       await load();
@@ -122,17 +147,17 @@ export default function ManageServices() {
   };
 
   const handleDelete = async (item) => {
-    if (!window.confirm(`Delete service "${item.name}"? This action cannot be undone.`)) return;
+    if (!window.confirm(`Delete item "${item.name}"? This action cannot be undone.`)) return;
     try {
       await deleteServiceItem(item._id);
-      setAlert({ type: 'success', message: `Service "${item.name}" deleted.` });
+      setAlert({ type: 'success', message: `Item "${item.name}" deleted.` });
       await load();
     } catch (err) {
       setAlert({ type: 'danger', message: 'Delete failed' });
     }
   };
 
-  const categories = ['All', ...new Set(services.map((s) => s.category))];
+  const categoriesList = ['All', ...new Set(services.map((s) => s.category))];
 
   const filtered = services.filter((s) => {
     const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase()) || s.category.toLowerCase().includes(search.toLowerCase());
@@ -147,14 +172,14 @@ export default function ManageServices() {
       <div className="page-header flex-between flex-wrap gap-3">
         <div>
           <h1 className="page-title flex items-center gap-2">
-            <Tag size={24} color="var(--brand-500)" /> Services & Dynamic Pricing Management
+            <Tag size={24} color="var(--brand-500)" /> Services & Product Catalog Management
           </h1>
           <p className="page-subtitle">
-            Control service packages, edit prices, and manage active service offerings across the platform.
+            Create products/services, add dynamic categories, and assign target Homepage Bar sections.
           </p>
         </div>
         <button className="btn btn-primary flex items-center gap-2" onClick={openCreateModal}>
-          <Plus size={18} /> Add New Service
+          <Plus size={18} /> Add New Service / Product
         </button>
       </div>
 
@@ -176,7 +201,7 @@ export default function ManageServices() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <span style={{ fontSize: '0.84rem', fontWeight: 700, color: 'var(--text-3)' }}>Category Filter:</span>
-          {categories.map((cat) => (
+          {categoriesList.map((cat) => (
             <button
               key={cat}
               onClick={() => setCategoryFilter(cat)}
@@ -211,110 +236,68 @@ export default function ManageServices() {
               }}
             >
               <div>
-                {/* Header Image & Badge */}
                 <div style={{ position: 'relative', height: 140, borderRadius: 12, overflow: 'hidden', marginBottom: 12 }}>
                   <img
                     src={item.img || 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=400&q=80'}
                     alt={item.name}
                     style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      left: 10,
-                      background: 'rgba(0, 0, 0, 0.75)',
-                      color: '#ffffff',
-                      padding: '3px 10px',
-                      borderRadius: 999,
-                      fontSize: '0.72rem',
-                      fontWeight: 700
-                    }}
-                  >
+                  <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 6 }}>
+                    <span style={{ background: item.itemType === 'product' ? '#8b5cf6' : 'var(--brand-500)', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                      {item.itemType === 'product' ? 'PRODUCT' : 'SERVICE'}
+                    </span>
+                    {item.section && item.section !== 'general' && (
+                      <span style={{ background: '#0284c7', color: '#fff', fontSize: '0.7rem', fontWeight: 800, padding: '3px 8px', borderRadius: 6 }}>
+                        {item.section.toUpperCase().replace('_', ' ')}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex-between items-center mb-1">
+                  <span style={{ fontSize: '0.72rem', fontWeight: 800, color: 'var(--brand-500)', textTransform: 'uppercase' }}>
                     {item.category}
+                  </span>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--text-3)', fontWeight: 700 }}>
+                    ★ {item.rating || '4.85'}
+                  </span>
+                </div>
+
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text)', margin: '0 0 6px' }}>
+                  {item.name}
+                </h3>
+                {item.description && (
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', margin: '0 0 10px', lineHeight: 1.4 }}>
+                    {item.description}
+                  </p>
+                )}
+              </div>
+
+              <div>
+                <div className="flex-between items-center my-3" style={{ borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+                  <div>
+                    <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'var(--text)' }}>₹{item.price}</span>
+                    {item.originalPrice > item.price && (
+                      <strike style={{ fontSize: '0.82rem', color: 'var(--text-4)', marginLeft: 6 }}>₹{item.originalPrice}</strike>
+                    )}
                   </div>
                   <button
                     onClick={() => toggleActive(item)}
-                    style={{
-                      position: 'absolute',
-                      top: 10,
-                      right: 10,
-                      background: item.isActive ? 'var(--success)' : 'var(--danger)',
-                      color: '#ffffff',
-                      border: 'none',
-                      padding: '3px 10px',
-                      borderRadius: 999,
-                      fontSize: '0.72rem',
-                      fontWeight: 800,
-                      cursor: 'pointer'
-                    }}
+                    className={`btn btn-sm ${item.isActive ? 'btn-outline' : 'btn-primary'}`}
+                    style={{ borderRadius: 8, fontSize: '0.75rem', padding: '3px 10px' }}
                   >
-                    {item.isActive ? 'Active' : 'Inactive'}
+                    {item.isActive ? 'Active' : 'Disabled'}
                   </button>
                 </div>
 
-                {/* Title & Metadata */}
-                <h3 style={{ margin: '0 0 6px', fontSize: '1.02rem', fontWeight: 800, color: 'var(--text)' }}>
-                  {item.name}
-                </h3>
-
-                <div className="flex items-center gap-3 mb-3" style={{ fontSize: '0.8rem', color: 'var(--text-3)', fontWeight: 600 }}>
-                  <span className="flex items-center gap-1"><Clock size={14} color="var(--brand-500)" /> {item.time}</span>
-                  <span className="flex items-center gap-1"><Star size={14} color="#f59e0b" fill="#f59e0b" /> {item.rating}</span>
-                </div>
-
-                {/* Price Display */}
-                <div
-                  style={{
-                    background: 'var(--surface-2)',
-                    padding: '10px 14px',
-                    borderRadius: 12,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: 14,
-                    border: '1px solid var(--border)'
-                  }}
-                >
-                  <div>
-                    <span style={{ fontSize: '0.74rem', fontWeight: 700, color: 'var(--text-3)', display: 'block' }}>Customer Price:</span>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                      <span style={{ fontSize: '1.2rem', fontWeight: 900, color: 'var(--brand-500)' }}>
-                        ₹{item.price}
-                      </span>
-                      {item.originalPrice > item.price && (
-                        <span style={{ fontSize: '0.85rem', textDecoration: 'line-through', color: 'var(--text-3)' }}>
-                          ₹{item.originalPrice}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => openEditModal(item)}
-                    className="btn btn-outline btn-sm"
-                    style={{ fontWeight: 700, fontSize: '0.78rem' }}
-                  >
-                    <Edit2 size={13} /> Edit Price
+                <div className="flex items-center gap-2">
+                  <button className="btn btn-outline btn-sm flex-1" onClick={() => openEditModal(item)} style={{ borderRadius: 8 }}>
+                    <Edit2 size={14} /> Edit
+                  </button>
+                  <button className="btn btn-outline btn-sm" onClick={() => handleDelete(item)} style={{ borderRadius: 8, color: '#ef4444', borderColor: '#ef4444' }}>
+                    <Trash2 size={14} />
                   </button>
                 </div>
-              </div>
-
-              {/* Bottom Actions */}
-              <div className="flex gap-2" style={{ borderTop: '1px solid var(--border)', paddingTop: 12 }}>
-                <button
-                  className="btn btn-outline btn-sm grow flex justify-center items-center gap-1"
-                  onClick={() => openEditModal(item)}
-                >
-                  <Edit2 size={13} /> Full Edit
-                </button>
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => handleDelete(item)}
-                  title="Delete Service"
-                >
-                  <Trash2 size={13} />
-                </button>
               </div>
             </div>
           ))}
@@ -325,7 +308,7 @@ export default function ManageServices() {
       {modalOpen && (
         <Modal
           open={modalOpen}
-          title={editingItem ? `Edit Service Price & Details` : `Add New Service`}
+          title={editingItem ? `Edit Service / Product Details` : `Add New Service or Product`}
           onClose={() => setModalOpen(false)}
           footer={
             <>
@@ -333,48 +316,86 @@ export default function ManageServices() {
                 Cancel
               </button>
               <button type="button" className="btn btn-primary" disabled={saving} onClick={handleSave}>
-                {saving ? <Spinner size={18} /> : editingItem ? 'Save Price Changes' : 'Create Service'}
+                {saving ? <Spinner size={18} /> : editingItem ? 'Save Changes' : 'Create Item'}
               </button>
             </>
           }
         >
           <form onSubmit={handleSave} className="flex flex-col gap-3">
+            <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="form-group">
+                <label className="form-label">Item Type <span className="req">*</span></label>
+                <select
+                  className="form-select"
+                  value={form.itemType}
+                  onChange={(e) => setForm({ ...form, itemType: e.target.value })}
+                >
+                  <option value="service">🛠️ Service Package</option>
+                  <option value="product">📦 Physical Product / Smart Appliance</option>
+                </select>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">Target Homepage Bar <span className="req">*</span></label>
+                <select
+                  className="form-select"
+                  value={form.section}
+                  onChange={(e) => setForm({ ...form, section: e.target.value })}
+                >
+                  <option value="spotlight">⭐ In the Spotlight Bar</option>
+                  <option value="new_noteworthy">🆕 New & Noteworthy Bar (Products)</option>
+                  <option value="most_booked">🔥 Most Booked Bar</option>
+                  <option value="general">📁 General Category Catalog</option>
+                </select>
+              </div>
+            </div>
+
             <div className="form-group">
-              <label className="form-label">Service Name <span className="req">*</span></label>
+              <label className="form-label">Item Name <span className="req">*</span></label>
               <input
                 className="form-input"
-                placeholder="e.g. Foam-Jet AC Service & Repair"
+                placeholder={form.itemType === 'product' ? 'e.g. Native Smart Water Purifier' : 'e.g. Stress Relief Swedish Body Massage'}
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 required
               />
             </div>
 
-            <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div className="form-group">
-                <label className="form-label">Category <span className="req">*</span></label>
-                <select
-                  className="form-select"
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                >
-                  <option value="AC & Appliance Repair">AC & Appliance Repair</option>
-                  <option value="Home Cleaning">Home Cleaning</option>
-                  <option value="Beauty & Salon">Beauty & Salon</option>
-                  <option value="Plumbing">Plumbing</option>
-                  <option value="Electrical">Electrical</option>
-                </select>
-              </div>
+            {/* Category selection + Custom Category Creation */}
+            <div className="form-group">
+              <label className="form-label">Category <span className="req">*</span></label>
+              <select
+                className="form-select"
+                value={isCustomCategory ? '__CUSTOM__' : form.category}
+                onChange={(e) => {
+                  if (e.target.value === '__CUSTOM__') {
+                    setIsCustomCategory(true);
+                  } else {
+                    setIsCustomCategory(false);
+                    setForm({ ...form, category: e.target.value });
+                  }
+                }}
+              >
+                <option value="AC & Appliance Repair">AC & Appliance Repair</option>
+                <option value="Home Cleaning">Home Cleaning</option>
+                <option value="Beauty & Salon">Beauty & Salon</option>
+                <option value="Plumbing">Plumbing</option>
+                <option value="Electrical">Electrical</option>
+                <option value="Carpentry">Carpentry</option>
+                <option value="Painting">Painting</option>
+                <option value="Pest Control">Pest Control</option>
+                <option value="__CUSTOM__">➕ Add New Custom Category...</option>
+              </select>
 
-              <div className="form-group">
-                <label className="form-label">Duration</label>
+              {isCustomCategory && (
                 <input
-                  className="form-input"
-                  placeholder="e.g. 1-2 hrs"
-                  value={form.time}
-                  onChange={(e) => setForm({ ...form, time: e.target.value })}
+                  className="form-input mt-2"
+                  placeholder="Enter new category name (e.g. Smart Appliances, Wellness & Spa)..."
+                  value={customCategory}
+                  onChange={(e) => setCustomCategory(e.target.value)}
+                  required
                 />
-              </div>
+              )}
             </div>
 
             <div className="form-grid" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
@@ -383,7 +404,7 @@ export default function ManageServices() {
                 <input
                   type="number"
                   className="form-input"
-                  placeholder="799"
+                  placeholder="1999"
                   value={form.price}
                   onChange={(e) => setForm({ ...form, price: e.target.value })}
                   required
@@ -395,11 +416,33 @@ export default function ManageServices() {
                 <input
                   type="number"
                   className="form-input"
-                  placeholder="899"
+                  placeholder="2299"
                   value={form.originalPrice}
                   onChange={(e) => setForm({ ...form, originalPrice: e.target.value })}
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Short Subtitle / Description</label>
+              <textarea
+                className="form-input"
+                rows={2}
+                placeholder="e.g. 10-stage RO + UV purification technology with 2-year zero maintenance warranty"
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Key Inclusions (One per line)</label>
+              <textarea
+                className="form-input"
+                rows={3}
+                placeholder="10-stage RO + UV + UF purification technology&#10;In-built TDS controller & mineral booster&#10;Zero maintenance cost for 2 full years"
+                value={form.inclusionsStr}
+                onChange={(e) => setForm({ ...form, inclusionsStr: e.target.value })}
+              />
             </div>
 
             <div className="form-group">

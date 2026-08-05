@@ -184,6 +184,7 @@ const NEW_NOTEWORTHY = [
   {
     title: 'Native Smart Water Purifier',
     category: 'AC & Appliance Repair',
+    itemType: 'product',
     price: 1999,
     originalPrice: 2299,
     rating: '4.91',
@@ -197,14 +198,15 @@ const NEW_NOTEWORTHY = [
     ]
   },
   {
-    title: 'Smart Television Wall Mounting',
+    title: 'Smart Television Wall Mount Module',
     category: 'Electrical',
+    itemType: 'product',
     price: 349,
     originalPrice: 449,
     rating: '4.85',
     img: img('photo-1593784991095-a205069470b6'),
     isNew: true,
-    subtitle: 'Precision Spirit Level TV Bracket Installation up to 75"',
+    subtitle: 'Heavy-Duty Spirit Level TV Bracket Frame up to 75"',
     inclusions: [
       'Heavy-duty wall bracket alignment with spirit level',
       'Cable conceal conduit routing & power socket check',
@@ -212,23 +214,9 @@ const NEW_NOTEWORTHY = [
     ]
   },
   {
-    title: 'Stress Relief Swedish Body Massage',
-    category: 'Beauty & Salon',
-    price: 1299,
-    originalPrice: 1499,
-    rating: '4.94',
-    img: img('photo-1544161515-4ab6ce6db874'),
-    isNew: true,
-    subtitle: 'Relaxing full body organic oil massage by top certified therapists',
-    inclusions: [
-      '60-minute full body muscle tension release massage',
-      'Aromatherapy lavender & eucalyptus essential oils',
-      'Single-use disposable sheets & fresh towel kit'
-    ]
-  },
-  {
     title: 'Native RO Water Softener for Taps',
     category: 'Plumbing',
+    itemType: 'product',
     price: 1499,
     originalPrice: 1799,
     rating: '4.88',
@@ -242,23 +230,9 @@ const NEW_NOTEWORTHY = [
     ]
   },
   {
-    title: 'Kitchen Chimney Servicing',
-    category: 'Home Cleaning',
-    price: 699,
-    originalPrice: 799,
-    rating: '4.85',
-    img: img('photo-1584622650111-993a426fbf0a'),
-    isNew: true,
-    subtitle: 'Complete mesh filter degreasing & motor inspection',
-    inclusions: [
-      'Chemical degreasing of baffle filters & oil collector',
-      'Internal blower cleaning & suction power checkup',
-      '30-day warranty against oil dripping'
-    ]
-  },
-  {
     title: 'Smart Modular Switchboard Module',
     category: 'Electrical',
+    itemType: 'product',
     price: 549,
     originalPrice: 649,
     rating: '4.82',
@@ -269,6 +243,138 @@ const NEW_NOTEWORTHY = [
       'Wi-Fi touch switch fitting inside existing modular board',
       'Mobile app pairing & voice assistant sync',
       'Safe surge protection & load testing'
+    ]
+  }
+];
+
+const NEW_NOTEWORTHY_SEE_ALL = [
+  ...NEW_NOTEWORTHY,
+  {
+    title: 'Native Smart HEPA Air Purifier',
+    category: 'AC & Appliance Repair',
+    itemType: 'product',
+    price: 2999,
+    originalPrice: 3499,
+    rating: '4.95',
+    img: img('photo-1584622650111-993a426fbf0a'),
+    isNew: true,
+    subtitle: '3-stage True HEPA filtration with real-time PM2.5 display',
+    inclusions: [
+      'Removes 99.97% of airborne dust, pollen & smoke particles',
+      'Smart sensor auto-adjusts fan speed based on room air quality',
+      'Ultra-silent night sleep mode (22dB)'
+    ]
+  },
+  {
+    title: 'Smart Touch Video Doorbell Camera',
+    category: 'Electrical',
+    itemType: 'product',
+    price: 1899,
+    originalPrice: 2199,
+    rating: '4.89',
+    img: img('photo-1558494949-ef010cbdcc31'),
+    isNew: true,
+    subtitle: '1080p HD Video Doorbell with 2-Way Audio & Infrared Night Vision',
+    inclusions: [
+      'Real-time motion detection push alerts on smartphone app',
+      'Rechargeable long-life lithium battery pack',
+      'IP65 weatherproof housing for outdoor installation'
+    ]
+  },
+  {
+    title: 'Automatic Digital Fingerprint Door Lock',
+    category: 'Carpentry',
+    itemType: 'product',
+    price: 3499,
+    originalPrice: 3999,
+    rating: '4.92',
+    img: img('photo-1588776814546-1ffedbe47100'),
+    isNew: true,
+    subtitle: 'Keyless 5-in-1 Entry: Biometric Fingerprint, PIN, RFID & App',
+    inclusions: [
+      '0.3s fast semiconductor fingerprint recognition sensor',
+      'Emergency mechanical key backup & USB power port',
+      'Anti-peep password protection mechanism'
+    ]
+  },
+  {
+    title: 'Native RO Purifier Replacement Filter Set',
+    category: 'AC & Appliance Repair',
+    itemType: 'product',
+    price: 799,
+    originalPrice: 999,
+    rating: '4.86',
+    img: img('photo-1548839140-29a749e1cf4e'),
+    isNew: true,
+    subtitle: 'Complete 3-piece filter pack: Sediment, Pre-Carbon & RO Membrane',
+    inclusions: [
+      '100% food-grade virgin polypropylene filter housing',
+      'High-adsorption activated carbon block for odor removal',
+      'Universal quick-connect fitting for all RO purifiers'
+    ]
+  }
+];
+
+const SPOTLIGHT_SEE_ALL = [
+  ...SPOTLIGHT_BANNERS,
+  {
+    title: 'Stress Relief Swedish Body Massage',
+    subtitle: 'Relaxing full body organic oil massage by top certified therapists',
+    category: 'Beauty & Salon',
+    price: 1299,
+    originalPrice: 1499,
+    rating: '4.94',
+    img: img('photo-1544161515-4ab6ce6db874', 600),
+    tag: 'Trending Spa',
+    inclusions: [
+      '60-minute full body muscle tension release massage',
+      'Aromatherapy lavender & eucalyptus essential oils',
+      'Single-use disposable sheets & fresh towel kit'
+    ]
+  },
+  {
+    title: 'Bathroom Tile & Grout Fixing Upgrade',
+    subtitle: 'Epoxy tile re-grouting & anti-leakage silicone sealing',
+    category: 'Plumbing',
+    price: 899,
+    originalPrice: 999,
+    rating: '4.84',
+    img: img('photo-1584622650111-993a426fbf0a', 600),
+    tag: 'Leak Guard',
+    inclusions: [
+      'Epoxy re-grouting of tile joints against water seepage',
+      'Descaling of shower heads, faucets & health faucets',
+      'Anti-fungal silicone sealing along wash basin edges'
+    ]
+  },
+  {
+    title: 'Kitchen Chimney Servicing & Degreasing',
+    subtitle: 'Chemical degreasing of baffle filters & motor inspection',
+    category: 'Home Cleaning',
+    price: 699,
+    originalPrice: 799,
+    rating: '4.85',
+    img: img('photo-1556909211-36987daf7b4d', 600),
+    tag: 'Hot Seller',
+    inclusions: [
+      'Chemical degreasing of baffle filters & oil collector',
+      'Internal blower cleaning & suction power checkup',
+      '30-day warranty against oil dripping'
+    ]
+  },
+  {
+    title: 'Full House Deep Sanitization & Pest Shield',
+    subtitle: 'Hospital-grade disinfectant mist spray & cockroach gel treatment',
+    category: 'Pest Control',
+    price: 1199,
+    originalPrice: 1399,
+    rating: '4.89',
+    img: img('photo-1508739773434-c26b3d09e071', 600),
+    tag: 'Shield Cover',
+    inclusions: [
+      'Thermal fogging & surface sanitization spray',
+      'Odorless Bayer cockroach gel application in kitchen',
+      '100% eco-friendly and safe for kids and pets'
     ]
   }
 ];
@@ -735,7 +841,7 @@ export default function LandingPage() {
             <span
               className="btn btn-outline btn-sm"
               style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
-              onClick={() => handleServiceClick({ title: 'In the Spotlight Services', type: 'section_all', items: spotlightBannersList })}
+              onClick={() => handleServiceClick({ title: 'In the Spotlight Services', type: 'section_all', items: SPOTLIGHT_SEE_ALL })}
             >
               See all →
             </span>
@@ -799,7 +905,7 @@ export default function LandingPage() {
             <span
               className="btn btn-outline btn-sm"
               style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
-              onClick={() => handleServiceClick({ title: 'New & Noteworthy Smart Products & Services', type: 'section_all', items: newNoteworthyList })}
+              onClick={() => handleServiceClick({ title: 'New & Noteworthy Products & Smart Appliances', type: 'section_all', items: NEW_NOTEWORTHY_SEE_ALL })}
             >
               See all →
             </span>
