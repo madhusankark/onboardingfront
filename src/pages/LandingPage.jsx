@@ -494,10 +494,6 @@ export default function LandingPage() {
   }, []);
 
   const handleServiceClick = (item) => {
-    if (!isAuthenticated) {
-      navigate('/login');
-      return;
-    }
     setActiveCategoryModal(item);
   };
 
