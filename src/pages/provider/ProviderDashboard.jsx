@@ -65,6 +65,24 @@ export default function ProviderDashboard() {
   const [leads, setLeads] = useState(DEMO_PROVIDER_LEADS);
   const [loadingLeads, setLoadingLeads] = useState(false);
 
+  const formatTimestamp = (dateStr) => {
+    if (!dateStr) return 'Recently Received';
+    const d = new Date(dateStr);
+    return (
+      d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }) +
+      ' at ' +
+      d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      })
+    );
+  };
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -276,14 +294,20 @@ export default function ProviderDashboard() {
 
                   <div className="flex gap-4" style={{ flexWrap: 'wrap', fontSize: '0.84rem', color: 'var(--text-2)' }}>
                     <div className="flex items-center gap-1"><MapPin size={14} color="var(--brand-500)" /> {lead.location}</div>
-                    <div className="flex items-center gap-1"><Calendar size={14} /> {lead.date} ({lead.timeSlot})</div>
+                    <div className="flex items-center gap-1"><Calendar size={14} /> Scheduled: {lead.date} ({lead.timeSlot})</div>
+                    <div className="flex items-center gap-1"><Clock size={14} color="var(--brand-500)" /> <strong>Received:</strong> {formatTimestamp(lead.createdAt)}</div>
                     <div className="flex items-center gap-1"><Phone size={14} color="var(--success)" /> {lead.customerPhone}</div>
                   </div>
 
-                  <div className="flex justify-between items-center mt-1 pt-2" style={{ borderTop: '1px solid var(--border)' }}>
-                    <span className="muted" style={{ fontSize: '0.78rem' }}>
-                      Order Ref: #{lead._id.slice(-8).toUpperCase()}
-                    </span>
+                  <div className="flex justify-between items-center mt-1 pt-2" style={{ borderTop: '1px solid var(--border)', flexWrap: 'wrap', gap: 8 }}>
+                    <div className="flex items-center gap-3">
+                      <span className="muted" style={{ fontSize: '0.78rem' }}>
+                        Order Ref: #{lead._id.slice(-8).toUpperCase()}
+                      </span>
+                      <span style={{ fontSize: '0.76rem', color: 'var(--brand-600)', fontWeight: 700, background: 'var(--brand-50)', padding: '2px 8px', borderRadius: 6 }}>
+                        🕒 {formatTimestamp(lead.createdAt)}
+                      </span>
+                    </div>
 
                     <div className="flex gap-2">
                       {lead.status !== 'in_progress' && lead.status !== 'completed' && (
