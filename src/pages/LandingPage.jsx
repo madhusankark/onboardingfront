@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../api/client';
 import Spinner from '../components/Spinner';
 import {
   Star,
@@ -458,7 +458,7 @@ export default function LandingPage() {
   useEffect(() => {
     const fetchDynamicPrices = async () => {
       try {
-        const res = await axios.get('/api/services');
+        const res = await api.get('/services');
         if (res.data?.services && res.data.services.length > 0) {
           const dbServices = res.data.services;
 
@@ -1262,13 +1262,23 @@ function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCa
         setLoading(true);
         const catQuery = catName ? `?category=${encodeURIComponent(catName)}` : '';
         const [pRes, sRes] = await Promise.all([
-          axios.get(`/api/provider/approved${catQuery}`),
-          axios.get('/api/services')
+          api.get(`/provider/approved${catQuery}`),
+          api.get('/services')
         ]);
-        setProviders(pRes.data.providers || []);
+        let provs = pRes.data.providers || [];
+        if (provs.length === 0) {
+          const allRes = await api.get('/provider/approved');
+          provs = allRes.data.providers || [];
+        }
+        setProviders(provs);
         setDbServices(sRes.data.services || []);
       } catch (err) {
-        setProviders([]);
+        try {
+          const fallbackRes = await api.get('/provider/approved');
+          setProviders(fallbackRes.data.providers || []);
+        } catch (e) {
+          setProviders([]);
+        }
       } finally {
         setLoading(false);
       }
