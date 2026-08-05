@@ -1240,6 +1240,7 @@ export default function LandingPage() {
 
 function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCart, getQty }) {
   const [providers, setProviders] = useState([]);
+  const [dbServices, setDbServices] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Detect what was passed:
@@ -1256,19 +1257,23 @@ function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCa
   const displayName = isCategoryTile ? category.title : isServiceObj ? category.title : category;
 
   useEffect(() => {
-    const fetchApproved = async () => {
+    const fetchApprovedAndServices = async () => {
       try {
         setLoading(true);
         const catQuery = catName ? `?category=${encodeURIComponent(catName)}` : '';
-        const res = await axios.get(`/api/provider/approved${catQuery}`);
-        setProviders(res.data.providers || []);
+        const [pRes, sRes] = await Promise.all([
+          axios.get(`/api/provider/approved${catQuery}`),
+          axios.get('/api/services')
+        ]);
+        setProviders(pRes.data.providers || []);
+        setDbServices(sRes.data.services || []);
       } catch (err) {
         setProviders([]);
       } finally {
         setLoading(false);
       }
     };
-    fetchApproved();
+    fetchApprovedAndServices();
   }, [catName]);
 
   const navigate = useNavigate();
@@ -1510,78 +1515,148 @@ function ApprovedProvidersModal({ category, onClose, onAddToCart, onRemoveFromCa
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(360px, 1fr))', gap: 16 }}>
-              {providers.map((p) => (
-                <div
-                  key={p._id}
-                  style={{
-                    padding: 18,
-                    borderRadius: 18,
-                    border: '1px solid var(--border)',
-                    background: 'var(--surface-2)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 12
-                  }}
-                >
-                  <div className="flex items-start gap-3">
-                    <img
-                      src={p.profilePhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
-                      alt={p.user?.name}
-                      style={{ width: 56, height: 56, borderRadius: 14, objectFit: 'cover', border: '2px solid var(--brand-500)' }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div className="flex items-center justify-between">
-                        <strong style={{ fontSize: '1.05rem', color: 'var(--text)' }}>{p.user?.name}</strong>
-                        <span style={{ background: 'var(--success-soft)', color: 'var(--success-dark, var(--success))', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999 }}>
-                          ● Admin Approved
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1 mt-1" style={{ fontSize: '0.82rem', color: '#f59e0b', fontWeight: 700 }}>
-                        <Star size={14} fill="#f59e0b" />
-                        <span>4.88 ★ ({p.experienceYears || 5}+ Yrs Experience)</span>
-                      </div>
-                    </div>
-                  </div>
+              {providers.map((p) => {
+                const categoryKeyword = (catName || displayName || '').split(/[\s&/]+/)[0].toLowerCase();
+                const matchingServices = dbServices.filter((s) => {
+                  if (!s.category) return false;
+                  return (
+                    s.category.toLowerCase().includes(categoryKeyword) ||
+                    (catName && s.category.toLowerCase() === catName.toLowerCase())
+                  );
+                });
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.84rem', color: 'var(--text-2)' }}>
-                    <div className="flex items-center gap-1"><MapPin size={14} color="var(--brand-500)" /> {[p.address, p.city].filter(Boolean).join(', ') || 'Vijayawada, AP'}</div>
-                    <div className="flex items-center gap-1"><Phone size={14} color="var(--success)" /> {p.phone || '+91 98765 11111'}</div>
-                  </div>
-
-                  {p.skills?.length > 0 && (
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      {p.skills.slice(0, 4).map((s) => (
-                        <span key={s} style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '0.74rem', padding: '2px 8px', borderRadius: 8, color: 'var(--text-2)', fontWeight: 600 }}>
-                          {s}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  <button
-                    className="btn btn-primary btn-sm btn-block mt-1"
-                    style={{ borderRadius: 10, fontWeight: 800 }}
-                    onClick={() => {
-                      const serviceTitle = isServiceObj ? category.title : (catName || 'Home Service Package');
-                      onAddToCart && onAddToCart({
-                        id: serviceTitle,
-                        name: serviceTitle,
-                        title: serviceTitle,
-                        price: category.price || 1299,
-                        originalPrice: category.originalPrice || 1499,
-                        category: catName || 'Beauty & Salon',
-                        providerId: p._id,
-                        providerName: p.user?.name,
-                        qty: 1
-                      });
-                      onClose && onClose();
-                      navigate('/cart');
+                return (
+                  <div
+                    key={p._id}
+                    style={{
+                      padding: 18,
+                      borderRadius: 18,
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface-2)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 12
                     }}
                   >
-                    Book {p.user?.name?.split(' ')[0]} Now →
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-start gap-3">
+                      <img
+                        src={p.profilePhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80'}
+                        alt={p.user?.name}
+                        style={{ width: 56, height: 56, borderRadius: 14, objectFit: 'cover', border: '2px solid var(--brand-500)' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div className="flex items-center justify-between">
+                          <strong style={{ fontSize: '1.05rem', color: 'var(--text)' }}>{p.user?.name}</strong>
+                          <span style={{ background: 'var(--success-soft)', color: 'var(--success-dark, var(--success))', fontSize: '0.72rem', fontWeight: 800, padding: '2px 8px', borderRadius: 999 }}>
+                            ● Admin Approved
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1 mt-1" style={{ fontSize: '0.82rem', color: '#f59e0b', fontWeight: 700 }}>
+                          <Star size={14} fill="#f59e0b" />
+                          <span>4.88 ★ ({p.experienceYears || 5}+ Yrs Experience)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: '0.84rem', color: 'var(--text-2)' }}>
+                      <div className="flex items-center gap-1"><MapPin size={14} color="var(--brand-500)" /> {[p.address, p.city].filter(Boolean).join(', ') || 'Vijayawada, AP'}</div>
+                      <div className="flex items-center gap-1"><Phone size={14} color="var(--success)" /> {p.phone || '+91 98765 11111'}</div>
+                    </div>
+
+                    {p.skills?.length > 0 && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                        {p.skills.slice(0, 4).map((s) => (
+                          <span key={s} style={{ background: 'var(--surface)', border: '1px solid var(--border)', fontSize: '0.74rem', padding: '2px 8px', borderRadius: 8, color: 'var(--text-2)', fontWeight: 600 }}>
+                            {s}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Admin-Approved Services & Pricing List */}
+                    {matchingServices.length > 0 && (
+                      <div style={{ marginTop: 4, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.76rem', fontWeight: 800, color: 'var(--brand-500)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span>Admin-Approved Services & Prices</span>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 600 }}>({matchingServices.length} available)</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                          {matchingServices.map((svc) => (
+                            <div
+                              key={svc._id || svc.name}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '8px 12px',
+                                borderRadius: 10,
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border)',
+                                gap: 10
+                              }}
+                            >
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <strong style={{ fontSize: '0.84rem', color: 'var(--text)', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{svc.name}</strong>
+                                <span style={{ fontSize: '0.74rem', color: 'var(--text-3)' }}>⚡ {svc.time || '1 hr'} • ★ {svc.rating || '4.85'}</span>
+                              </div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                                <div style={{ textAlign: 'right' }}>
+                                  <strong style={{ fontSize: '0.92rem', color: 'var(--brand-600)', display: 'block' }}>₹{svc.price}</strong>
+                                  {svc.originalPrice && <strike style={{ fontSize: '0.72rem', color: 'var(--text-4)' }}>₹{svc.originalPrice}</strike>}
+                                </div>
+                                <button
+                                  className="btn btn-primary btn-sm"
+                                  style={{ borderRadius: 8, fontSize: '0.74rem', fontWeight: 800, padding: '4px 10px' }}
+                                  onClick={() => {
+                                    onAddToCart && onAddToCart({
+                                      id: svc.name,
+                                      name: svc.name,
+                                      title: svc.name,
+                                      price: svc.price,
+                                      originalPrice: svc.originalPrice,
+                                      category: svc.category || catName,
+                                      providerId: p._id,
+                                      providerName: p.user?.name,
+                                      qty: 1
+                                    });
+                                    onClose && onClose();
+                                    navigate('/cart');
+                                  }}
+                                >
+                                  Book →
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <button
+                      className="btn btn-outline btn-sm btn-block mt-1"
+                      style={{ borderRadius: 10, fontWeight: 800, borderColor: 'var(--brand-500)', color: 'var(--brand-600)' }}
+                      onClick={() => {
+                        const serviceTitle = isServiceObj ? category.title : (catName || 'Home Service Package');
+                        onAddToCart && onAddToCart({
+                          id: serviceTitle,
+                          name: serviceTitle,
+                          title: serviceTitle,
+                          price: category.price || 1299,
+                          originalPrice: category.originalPrice || 1499,
+                          category: catName || 'Beauty & Salon',
+                          providerId: p._id,
+                          providerName: p.user?.name,
+                          qty: 1
+                        });
+                        onClose && onClose();
+                        navigate('/cart');
+                      }}
+                    >
+                      Book {p.user?.name?.split(' ')[0]} Now →
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
