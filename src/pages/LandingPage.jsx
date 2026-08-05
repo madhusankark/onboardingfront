@@ -706,7 +706,13 @@ export default function LandingPage() {
         <section style={{ marginTop: 44 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>In the spotlight</h2>
-            <span className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>See all →</span>
+            <span
+              className="btn btn-outline btn-sm"
+              style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
+              onClick={() => handleServiceClick('All Services')}
+            >
+              See all →
+            </span>
           </div>
            <div style={{ display: 'flex', gap: 20, overflowX: 'auto', paddingBottom: 12, scrollSnapType: 'x mandatory' }}>
             {spotlightBannersList.map((b) => (
@@ -760,9 +766,18 @@ export default function LandingPage() {
 
         {/* ============ NEW & NOTEWORTHY ============ */}
         <section style={{ marginTop: 44 }}>
-          <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)', marginBottom: 18 }}>
-            New and noteworthy
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>
+              New and noteworthy
+            </h2>
+            <span
+              className="btn btn-outline btn-sm"
+              style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
+              onClick={() => handleServiceClick('All Services')}
+            >
+              See all →
+            </span>
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
             {newNoteworthyList.map((item) => (
               <div
@@ -848,7 +863,13 @@ export default function LandingPage() {
         <section style={{ marginTop: 44 }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
             <h2 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text)' }}>Most booked services</h2>
-            <span className="btn btn-outline btn-sm" style={{ cursor: 'pointer' }}>See all →</span>
+            <span
+              className="btn btn-outline btn-sm"
+              style={{ cursor: 'pointer', borderColor: 'var(--brand-500)', color: 'var(--brand-600)', fontWeight: 800 }}
+              onClick={() => handleServiceClick('All Services')}
+            >
+              See all →
+            </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(330px, 1fr))', gap: 20 }}>
             {mostBookedList.map((srv) => (
