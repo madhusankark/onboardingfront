@@ -113,7 +113,19 @@ export default function ProviderDashboard() {
     load();
 
     // ⚡ Socket.io WebSockets Engine: Listen for real-time customer bookings
-    const socket = io('http://localhost:5000', { transports: ['websocket', 'polling'] });
+    const getSocketUrl = () => {
+      const apiUrl = import.meta.env.VITE_API_URL || '';
+      if (apiUrl.startsWith('http')) {
+        try {
+          return new URL(apiUrl).origin;
+        } catch (e) {
+          // fallback
+        }
+      }
+      return window.location.origin;
+    };
+
+    const socket = io(getSocketUrl(), { transports: ['websocket', 'polling'] });
     socket.on('new_booking', (payload) => {
       if (payload && payload.booking) {
         setLeads((prev) => [payload.booking, ...prev]);
